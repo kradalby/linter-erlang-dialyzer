@@ -22,7 +22,7 @@ module.exports =
       description: "Paths seperated by space"
   activate: ->
     @subscriptions = new CompositeDisposable
-    @subscriptions.add atom.config.observe 'linter-erlang-dialyzer-dialyzer.executablePath',
+    @subscriptions.add atom.config.observe 'linter-erlang-dialyzer.executablePath',
       (executablePath) =>
         @executablePath = executablePath
     @subscriptions.add atom.config.observe 'linter-erlang-dialyzer.includeDirs',
@@ -52,35 +52,30 @@ module.exports =
           @paPaths = @paPaths + project_deps_ebin
 
           compile_result = ""
-          erlc_args = ["-Wall"]
-          erlc_args.push "-I", dir.trim() for dir in @includeDirs.split(" ")
-          erlc_args.push "-pa", pa.trim() for pa in @paPaths.split(" ") unless @paPaths == ""
-          erlc_args.push "-o", os.tmpDir()
-          erlc_args.push filePath
+          dialyzer_args = []
+          dialyzer_args.push "-I", dir.trim() for dir in @includeDirs.split(" ")
+          dialyzer_args.push "-pa", pa.trim() for pa in @paPaths.split(" ") unless @paPaths == ""
+          dialyzer_args.push filePath
 
           error_stack = []
 
           ## This fun will parse the row and split stuff nicely
           parse_row = (row) ->
-            if row.indexOf("Module name") != -1
-              error_msg = row.split(":")[1]
-              linenr = 1
-              error_type = "Error"
-            else
-              row_splittreedA = row.slice(0, row.indexOf(":"))
-              re = /[\w\/.]+:(\d+):(.+)/
-              re_result = re.exec(row)
+            row_splittreedA = row.slice(0, row.indexOf(":"))
+            re = /[\w\/.]+:(\d+):(.+)/
+            re_result = re.exec(row)
+            if re_result
               error_type = "Warning"
               linenr = parseInt(re_result[1], 10)
               error_msg = re_result[2].trim()
-            error_stack.push
-              type: error_type
-              text: error_msg
-              filePath: filePath
-              range: helpers.rangeFromLineNumber(textEditor, linenr - 1)
+              error_stack.push
+                type: error_type
+                text: error_msg
+                filePath: filePath
+                range: helpers.rangeFromLineNumber(textEditor, linenr - 1)
           process = new BufferedProcess
             command: @executablePath
-            args: erlc_args
+            args: dialyzer_args
             options:
               cwd: project_path[0] # Should use better folder perhaps
             stdout: (data) ->

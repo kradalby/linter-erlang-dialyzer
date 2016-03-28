@@ -2,14 +2,15 @@
   "name": "linter-erlang-dialyzer",
   "main": "./lib/linter-erlang-dialyzer",
   "version": "0.0.1",
-  "description": "A short description of your package",
-  "keywords": [
-  ],
-  "activationCommands": {
-    "atom-workspace": "linter-erlang-dialyzer:toggle"
-  },
+  "main": "./lib/init",
+  "linter-package": true,
+  "description": "Bare minimum Erlang dialyzer lint package",
   "repository": "https://github.com/kradalby/linter-erlang-dialyzer",
   "license": "MIT",
+  "keywords": [
+      "erlang",
+      "dialyzer"
+  ],
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
